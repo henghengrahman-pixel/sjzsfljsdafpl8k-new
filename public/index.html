@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>AGENT MASTER 8008</title><link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div id="toast"></div>
+<section id="loginView" class="login-wrap">
+  <form id="loginForm" class="login-card">
+    <div class="brand-mark">8008</div><h1 id="loginTitle">AGENT MASTER 8008</h1><p>Secure Operator Panel</p>
+    <label>ID Agent<input id="loginUser" autocomplete="username" required></label>
+    <label>Password<input id="loginPass" type="password" autocomplete="current-password" required></label>
+    <div id="login2faSetup" class="secret-box hidden"></div>
+    <label id="loginOtpLabel" class="hidden">Kode 2FA<input id="loginOtp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"></label>
+    <button class="btn primary full">LOGIN</button>
+  </form>
+</section>
+<div id="appView" class="app hidden">
+  <header class="topbar"><div><b id="appName">AGENT MASTER 8008</b><small id="who"></small></div><button id="logoutBtn" class="btn ghost">Keluar</button></header>
+  <main>
+    <nav class="tabs">
+      <button data-page="money" class="active">Deposit / Withdraw</button><button data-page="manual">Transaksi Manual</button><button data-page="player">Player</button><button data-page="transhistory">History Transaksi</button><button data-page="result">Result / Pasaran</button><button data-page="report">Report</button><button data-master data-page="agents">Agent</button><button data-master data-page="session">Session</button><button data-master data-page="audit">Audit</button>
+    </nav>
+
+    <section id="page-money" class="page active">
+      <div class="money-head card">
+        <div><div class="card-title">Deposit & Withdraw Realtime</div><div class="muted">Data pending AGWL5 diperbarui otomatis. Accept/Reject selalu diverifikasi ulang ke transaksi terbaru sebelum dikirim.</div></div>
+        <div class="money-switch"><button id="moneyDeposit" class="btn primary" type="button">DEPOSIT <span id="depositCount"></span></button><button id="moneyWithdraw" class="btn" type="button">WITHDRAW <span id="withdrawCount"></span></button></div>
+        <div class="money-tools"><span id="moneyLive" class="live-dot">● LIVE</span><button id="moneyRefresh" class="btn" type="button">REFRESH</button></div>
+      </div>
+      <div id="moneyStatus" class="muted money-status">Mengambil transaksi...</div>
+      <div id="moneyBankFilters" class="money-bank-filters" aria-label="Filter bank"></div>
+      <div id="moneyBulkBar" class="money-bulk-bar hidden" aria-live="polite"><div><b id="moneySelectedCount">0 DIPILIH</b><span id="moneySelectedTotal">Total 0</span></div><div class="money-bulk-actions"><button id="moneySelectVisible" class="btn" type="button">PILIH SEMUA YANG TAMPIL</button><button id="moneyBulkAccept" class="btn accept-btn" type="button">ACCEPT TERPILIH</button><button id="moneyBulkReject" class="btn danger" type="button">REJECT TERPILIH</button><button id="moneyClearSelection" class="btn ghost" type="button">BATAL PILIH</button></div></div>
+      <div id="moneyList"></div>
+    </section>
+
+    <section id="page-manual" class="page">
+      <div class="grid two">
+        <form id="manualForm" class="card">
+          <div class="card-title">Deposit / Withdraw Manual</div>
+          <label>User ID<input id="txUserid" required autocomplete="off" placeholder="contoh: member123"></label>
+          <label>Jenis<select id="txType"><option value="depo">Deposit</option><option value="wd">Withdraw</option></select></label>
+          <label>Jumlah<input id="txAmount" inputmode="numeric" required placeholder="50,000"></label>
+          <label>Info <span class="muted">(opsional)</span><input id="txInfo" maxlength="120"></label>
+          <div id="txConfirm" class="confirm-box hidden"></div>
+          <button class="btn primary full" id="txSubmit">PROSES TRANSAKSI</button>
+        </form>
+        <div class="card"><div class="card-title">Status</div><div id="sessionBadge" class="status neutral">Session belum dicek</div><div id="txResult" class="result muted">Belum ada transaksi.</div></div>
+      </div>
+    </section>
+
+    <section id="page-player" class="page">
+      <div class="card"><div class="card-title">Cek Player — agentplayerlist.php</div><form id="searchForm" class="inline"><select id="searchType" aria-label="Jenis pencarian"><option value="userid">User ID</option><option value="rekening">Nomor Rekening</option></select><input id="searchValue" required autocomplete="off" placeholder="Masukkan User ID"><button class="btn primary">CARI</button></form><div class="muted">Pencarian langsung ke agentplayerlist.php menggunakan session AGWL5 aktif.</div></div>
+      <div id="playerResult" class="card hidden"></div>
+      <div id="profileCard" class="card hidden"></div>
+      <div id="historyCard" class="card hidden"></div>
+      <div id="resetCard" class="card hidden"><div class="card-title">Reset Password</div><form id="resetForm" class="grid two"><label>Password Baru<input id="newPass" type="password" minlength="6" required></label><label>Konfirmasi<input id="confirmPass" type="password" minlength="6" required></label><button class="btn danger">RESET PASSWORD</button></form><div id="resetSuccess" class="reset-success hidden"></div></div>
+    </section>
+
+
+    <section id="page-transhistory" class="page">
+      <div class="card">
+        <div class="card-title">History Transaksi Pemain</div>
+        <form id="transactionHistoryForm" class="history-search">
+          <label>User ID<input id="historyUserid" required autocomplete="off" placeholder="Masukkan User ID"></label>
+          <button class="btn primary" type="submit">CARI HISTORY</button>
+        </form>
+        <div class="muted">Sumber: history_trans.php → admin_transaksi.php menggunakan session AGWL5 aktif.</div>
+      </div>
+      <div id="transactionHistoryResult" class="card table-card hidden"></div>
+    </section>
+
+    <section id="page-result" class="page">
+      <div class="card result-panel">
+        <div class="card-title">Result & Pasaran</div>
+        <div class="result-grid"><label>Pasaran<select id="marketSelect"><option value="">Memuat pasaran...</option></select></label><label>Periode Aktif<input id="marketPeriod" inputmode="numeric" autocomplete="off" placeholder="Periode"></label></div>
+        <div class="result-stage" id="marketStatus">Pilih pasaran untuk mulai.</div>
+        <div class="market-subtabs">
+          <button class="btn active" data-market-view="prediction">PREDIKSI</button>
+          <button class="btn" data-market-view="result">NOMOR KELUAR</button>
+          <button class="btn" data-market-view="calculate">HITUNG</button>
+        </div>
+      </div>
+      <div id="marketPredictionPanel" class="card result-panel market-work-panel">
+        <div class="card-title">Prediksi <span class="market-name-label"></span></div>
+        <div class="muted">Form mengikuti jumlah prize yang tersedia pada pasaran terpilih.</div>
+        <div id="predictionNumbers" class="result-numbers"></div>
+        <button class="btn primary full market-submit" data-action="prediction">KIRIM PREDIKSI</button>
+      </div>
+      <div id="marketResultPanel" class="card result-panel market-work-panel hidden">
+        <div class="card-title">Nomor Keluar <span class="market-name-label"></span></div>
+        <div id="lastMarketResult" class="last-market-result">Pilih pasaran untuk melihat angka terakhir.</div>
+        <div id="resultNumbers" class="result-numbers"></div>
+        <button class="btn primary full market-submit" data-action="result">KIRIM NOMOR KELUAR</button>
+      </div>
+      <div id="marketCalculatePanel" class="card result-panel market-work-panel hidden">
+        <div class="card-title">Hitung <span class="market-name-label"></span></div>
+        <div class="muted">Hitung digunakan setelah Nomor Keluar berhasil disimpan untuk membayar kemenangan member.</div>
+        <div id="calculateSummary" class="calculate-summary">Belum ada Nomor Keluar yang siap dihitung.</div>
+        <button id="calculateMarketButton" class="btn primary full market-submit" data-action="calculate" disabled>HITUNG / BAYAR KEMENANGAN</button>
+      </div>
+      <div id="marketHistory" class="card table-card hidden"></div>
+    </section>
+    <section id="page-report" class="page">
+      <div class="card"><div class="card-title center">Report — History Operator</div><form id="reportForm" class="filters"><label>Tanggal Awal<input id="dateFrom" type="date" required></label><label>Tanggal Akhir<input id="dateTo" type="date" required></label><button class="btn primary">SUBMIT</button></form></div>
+      <div class="toolbar"><button id="exportSummary" class="btn">Export Summary Excel</button><button id="exportDetail" class="btn">Export All Data Excel</button></div>
+      <div class="card table-card"><div id="reportTitle" class="table-title">Laporan ALL GAMES</div><div class="table-wrap"><table><thead><tr><th>No</th><th>OPERATOR</th><th>DEPOSIT</th><th>WITHDRAW</th><th>REJECT</th></tr></thead><tbody id="summaryBody"></tbody></table></div></div>
+      <div id="detailBox" class="card table-card hidden"><div id="detailTitle" class="table-title"></div><div class="table-wrap"><table><thead><tr><th>No</th><th>Tanggal Terima</th><th>User</th><th>Action</th><th>Dari Bank</th><th>Tujuan Bank</th><th>Jumlah</th><th>Status</th><th>Operator</th></tr></thead><tbody id="detailBody"></tbody></table></div></div>
+    </section>
+
+    <section id="page-agents" class="page"><div class="grid two"><form id="agentForm" class="card"><div class="card-title">Tambah Agent</div><label>Username<input id="agentUsername" required></label><label>Alias<input id="agentAlias" required></label><label>Password Awal<input id="agentPassword" type="password" minlength="8" required></label><button class="btn primary">BUAT AGENT</button></form><div id="agentSecret" class="card hidden"></div></div><div id="agentList" class="card"></div></section>
+
+    <section id="page-session" class="page"><div class="grid two"><form id="sessionForm" class="card"><div class="card-title">Cookie Session AGWL5</div><p class="muted">Tempel nilai Cookie header dari session login yang sah. Cookie disimpan terenkripsi di server dan tidak ditampilkan kembali.</p><textarea id="cookieInput" rows="9" required placeholder="PHPSESSID=...; cookie_lain=..."></textarea><button class="btn primary full">SIMPAN & TEST SESSION</button></form><div class="card"><div class="card-title">Status Session</div><div id="sessionDetail"></div><div class="button-row"><button id="testSession" class="btn">TEST</button><button id="deleteSession" class="btn danger">HAPUS</button></div></div></div><form id="loginLinkForm" class="card session-link-card"><div class="card-title">LINK AKTIF</div><p class="muted">Link ini otomatis dipakai pada hasil Reset Password yang berhasil.</p><label>Link Login Aktif<input id="activeLoginLink" type="url" inputmode="url" required placeholder="https://omtogelcity.com/clearcache"></label><button class="btn primary full">SIMPAN / PERBARUI LINK</button></form></section>
+    <section id="page-audit" class="page"><div class="card table-card"><div class="card-title">Audit Log</div><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Agent</th><th>Action</th><th>Target</th><th>IP</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></section>
+  </main>
+</div>
+<div id="detailModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle"><div class="modal-backdrop" data-close-modal></div><div class="modal-card"><div class="modal-head"><b id="detailModalTitle">Detail Transaksi</b><button class="btn ghost" type="button" data-close-modal>✕</button></div><div id="detailModalBody" class="modal-body"></div></div></div>
+<script src="/app.js" defer></script>
+</body></html>

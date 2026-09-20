@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+const server=fs.readFileSync('src/server.js','utf8'), app=fs.readFileSync('public/app.js','utf8'), html=fs.readFileSync('public/index.html','utf8'), db=fs.readFileSync('src/db.js','utf8');
+test('active login link persisted in app_meta and managed from Session',()=>{assert.match(db,/active_login_link/);assert.match(server,/\/api\/session\/login-link/);assert.match(html,/LINK AKTIF/);assert.match(app,/loginLinkForm/)});
+test('successful reset returns ephemeral copy payload only on upstream success',()=>{assert.match(server,/if\(!r\.ok\)return res\.status\(502\)/);assert.match(server,/resetResult:\{userid:p\.data\.userid,password:p\.data\.password,loginLink/);assert.match(server,/audit\(db,req,'RESET_PASSWORD',p\.data\.userid,\{ok:r\.ok\}\)/)});
+test('mobile reset result has copy all and individual copy controls',()=>{assert.match(html,/resetSuccess/);assert.match(app,/COPY SEMUA/);assert.match(app,/COPY PASSWORD/);assert.match(app,/Silahkan dicoba bosku/)});
