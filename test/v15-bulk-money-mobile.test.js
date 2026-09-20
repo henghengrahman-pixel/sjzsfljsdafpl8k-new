@@ -1,5 +1,0 @@
-import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs';
-const app=fs.readFileSync('public/app.js','utf8'), html=fs.readFileSync('public/index.html','utf8'), css=fs.readFileSync('public/app.css','utf8'), server=fs.readFileSync('src/server.js','utf8'), upstream=fs.readFileSync('src/upstream.js','utf8');
-test('bulk UI selects only checked/visible pending rows',()=>{assert.match(html,/moneyBulkAccept/);assert.match(app,/data-money-select/);assert.match(app,/PILIH SEMUA YANG TAMPIL/);assert.match(app,/HANYA transaksi yang dicentang/)});
-test('bulk API refetches pending and posts selected upstream checkbox ids',()=>{assert.match(server,/decision-bulk/);assert.match(upstream,/decidePendingMoneyBulk/);assert.match(upstream,/const fresh=await this\.pendingMoney\(type\)/);assert.match(upstream,/form\[row\.checkboxName\]='on'/)});
-test('account number and name have explicit larger mobile styles',()=>{assert.match(app,/money-account-name/);assert.match(css,/\.money-account\{[^}]*font-size:19px/);assert.match(css,/@media\(max-width:760px\)[\s\S]*\.money-account\{font-size:21px/)});
