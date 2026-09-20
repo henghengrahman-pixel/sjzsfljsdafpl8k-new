@@ -98,10 +98,38 @@ export async function migrate(db){
 }
 
 export async function bootstrapMaster(db,cfg){
-  const found = await db.query('SELECT id FROM app_users WHERE role=$1 LIMIT 1',['master']);
-  if(found.rows[0]) return;
   const hash = await bcrypt.hash(cfg.masterPassword,12);
-  await db.query(`INSERT INTO app_users(username,alias,password_hash,totp_secret,role,active) VALUES($1,$2,$3,$4,'master',true)`,
-    [cfg.masterUsername,'MASTER',hash,generateTotpSecret()]);
-  console.log(`MASTER_CREATED username=${cfg.masterUsername}`);
+  const found = await db.query(
+    'SELECT id,username FROM app_users WHERE role=$1 ORDER BY created_at ASC LIMIT 1',
+    ['master']
+  );
+
+  if(!found.rows[0]){
+    await db.query(
+      `INSERT INTO app_users(username,alias,password_hash,totp_secret,role,active)
+       VALUES($1,$2,$3,$4,'master',true)`,
+      [cfg.masterUsername,'MASTER',hash,generateTotpSecret()]
+    );
+    console.log(`MASTER_CREATED username=${cfg.masterUsername}`);
+    return;
+  }
+
+  const master=found.rows[0];
+  const conflict=await db.query(
+    'SELECT id,role FROM app_users WHERE username=$1 AND id<>$2 LIMIT 1',
+    [cfg.masterUsername,master.id]
+  );
+  if(conflict.rows[0]){
+    throw new Error(`CONFIG_ERROR: MASTER_USERNAME '${cfg.masterUsername}' sudah dipakai akun lain`);
+  }
+
+  // Railway MASTER_USERNAME / MASTER_PASSWORD are the source of truth for the
+  // master credential. Keep the existing per-user TOTP enrollment untouched.
+  await db.query(
+    `UPDATE app_users
+        SET username=$2,password_hash=$3,active=true,updated_at=NOW()
+      WHERE id=$1`,
+    [master.id,cfg.masterUsername,hash]
+  );
+  console.log(`MASTER_SYNCED username=${cfg.masterUsername}`);
 }
